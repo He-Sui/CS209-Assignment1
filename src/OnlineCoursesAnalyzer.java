@@ -100,7 +100,14 @@ public class OnlineCoursesAnalyzer {
     }
 
     public List<String> searchCourses(String courseSubject, double percentAudited, double totalCourseHours) {
-        return null;
+        return courses.stream()
+                .filter(x -> x.getSubject().toLowerCase().contains(courseSubject.toLowerCase()))
+                .filter(x -> x.getPercentAudited() >= percentAudited)
+                .filter(x -> x.getTotalHours() <= totalCourseHours)
+                .map(Course::getTitle)
+                .distinct()
+                .sorted(String::compareTo)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     public List<String> recommendCourses(int age, int gender, int isBachelorOrHigher) {
