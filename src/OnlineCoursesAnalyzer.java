@@ -3,6 +3,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class OnlineCoursesAnalyzer {
 
@@ -39,11 +40,16 @@ public class OnlineCoursesAnalyzer {
     }
 
     public Map<String, Integer> getPtcpCountByInst() {
-        return null;
+        return courses.stream().collect(Collectors.groupingBy(Course::getInstitution, Collectors.summingInt(Course::getParticipants))).entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
     }
 
     public Map<String, Integer> getPtcpCountByInstAndSubject() {
-        return null;
+        return courses.stream()
+                .collect(Collectors.groupingBy(x -> x.getInstitution().concat("-").concat(x.getSubject()), Collectors.summingInt(Course::getParticipants))).entrySet().stream()
+                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed().thenComparing(Map.Entry::getKey))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
     }
 
     public Map<String, List<List<String>>> getCourseListOfInstructor() {
