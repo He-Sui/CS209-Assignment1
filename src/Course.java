@@ -1,11 +1,11 @@
-import java.util.Date;
+import java.util.*;
 
-class Course {
+public class Course {
     private final String institution;
     private final String number;
     private final Date launchDate;
     private final String title;
-    private final String instructors;
+    private final ArrayList<String> instructors = new ArrayList<>();
     private final String subject;
     private final int year;
     private final int honorCode;
@@ -42,7 +42,7 @@ class Course {
         this.title = title;
         if (instructors.startsWith("\"")) instructors = instructors.substring(1);
         if (instructors.endsWith("\"")) instructors = instructors.substring(0, instructors.length() - 1);
-        this.instructors = instructors;
+        Collections.addAll(this.instructors, instructors.split(", "));
         if (subject.startsWith("\"")) subject = subject.substring(1);
         if (subject.endsWith("\"")) subject = subject.substring(0, subject.length() - 1);
         this.subject = subject;
@@ -81,7 +81,7 @@ class Course {
         return title;
     }
 
-    public String getInstructors() {
+    public ArrayList<String> getInstructors() {
         return instructors;
     }
 

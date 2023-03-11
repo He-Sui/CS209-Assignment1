@@ -53,7 +53,31 @@ public class OnlineCoursesAnalyzer {
     }
 
     public Map<String, List<List<String>>> getCourseListOfInstructor() {
-        return null;
+        return courses.stream()
+                .flatMap(course -> course.getInstructors().stream().map(instructor -> new AbstractMap.SimpleEntry<>(instructor, course)))
+                .collect(Collectors.groupingBy(
+                        Map.Entry::getKey,
+                        Collectors.mapping(Map.Entry::getValue, Collectors.toList())
+                ))
+                .entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> {
+                            List<String> list0 = entry.getValue().stream()
+                                    .filter(course -> course.getInstructors().size() == 1)
+                                    .map(Course::getTitle)
+                                    .distinct()
+                                    .sorted()
+                                    .collect(Collectors.toList());
+                            List<String> list1 = entry.getValue().stream()
+                                    .filter(course -> course.getInstructors().size() > 1)
+                                    .map(Course::getTitle)
+                                    .distinct()
+                                    .sorted()
+                                    .collect(Collectors.toList());
+                            return Arrays.asList(list0, list1);
+                        }
+                ));
     }
 
     public List<String> getCourses(int topK, String by) {
