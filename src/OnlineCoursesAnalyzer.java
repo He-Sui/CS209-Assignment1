@@ -81,7 +81,22 @@ public class OnlineCoursesAnalyzer {
     }
 
     public List<String> getCourses(int topK, String by) {
-        return null;
+        if (by.equals("hours")) {
+            return courses.stream()
+                    .sorted(Comparator.comparing(Course::getTotalHours).reversed().thenComparing(Course::getTitle))
+                    .map(Course::getTitle)
+                    .distinct()
+                    .limit(topK)
+                    .collect(Collectors.toCollection(ArrayList::new));
+        } else if (by.equals("participants")) {
+            return courses.stream()
+                    .sorted(Comparator.comparingInt(Course::getParticipants).reversed().thenComparing(Course::getTitle))
+                    .map(Course::getTitle)
+                    .distinct()
+                    .limit(topK)
+                    .collect(Collectors.toCollection(ArrayList::new));
+        } else
+            return null;
     }
 
     public List<String> searchCourses(String courseSubject, double percentAudited, double totalCourseHours) {
