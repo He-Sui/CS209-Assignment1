@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 public class OnlineCoursesAnalyzer {
 
-    List<Course> courses = new ArrayList<>();
+    private final List<Course> courses = new ArrayList<>();
 
     public OnlineCoursesAnalyzer(String datasetPath) {
         BufferedReader br = null;
@@ -111,6 +111,27 @@ public class OnlineCoursesAnalyzer {
     }
 
     public List<String> recommendCourses(int age, int gender, int isBachelorOrHigher) {
-        return null;
+        Map<String, Double> averageAge = courses.stream()
+                .collect(Collectors.groupingBy(Course::getNumber, Collectors.averagingDouble(Course::getMedianAge)));
+        Map<String, Double> averageMalePercent = courses.stream()
+                .collect(Collectors.groupingBy(Course::getNumber, Collectors.averagingDouble(Course::getPercentMale)));
+        Map<String, Double> averagePercentDegree = courses.stream()
+                .collect(Collectors.groupingBy(Course::getNumber, Collectors.averagingDouble(Course::getPercentDegree)));
+        return courses.stream()
+                .map(course -> new AbstractMap.SimpleEntry<>(course, Math.pow(age - averageAge.get(course.getNumber()), 2) + Math.pow(gender * 100 - averageMalePercent.get(course.getNumber()), 2) + Math.pow(isBachelorOrHigher * 100 - averagePercentDegree.get(course.getNumber()), 2)))
+                .sorted(Map.Entry.comparingByValue())
+                .map(e -> new AbstractMap.SimpleEntry<>(e.getKey().getNumber(), e.getValue()))
+                .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue, (v1, v2) -> v1)).entrySet().stream()
+                .sorted(Map.Entry.comparingByValue())
+                .limit(10)
+                .map(e -> new AbstractMap.SimpleEntry<>(courses.stream()
+                        .filter(c -> c.getNumber().equals(e.getKey()))
+                        .max(Comparator.comparing(Course::getLaunchDate))
+                        .get()
+                        .getTitle(), e.getValue())
+                )
+                .sorted(Map.Entry.<String, Double>comparingByValue().thenComparing(Map.Entry.comparingByKey()))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 }
